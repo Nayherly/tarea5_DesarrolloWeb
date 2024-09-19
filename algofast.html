@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Diario de Viaje</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Estilos básicos para mejorar la presentación */
+        body { font-family: sans-serif; }
+        
+        #asesoria { margin-top: 20px; }
+    </style>
+<script>
+        // Función para guardar un dato en el almacenamiento local
+        function guardarDato() {
+            const datoInput = document.getElementById('dato');
+            const dato = datoInput.value; 
+
+            localStorage.setItem('miDato', dato); 
+
+            datoInput.value = '';
+
+            mostrarDato(); 
+        }
+
+        // Función para mostrar el dato almacenado
+        function mostrarDato() {
+            const resultado = document.getElementById('resultado');
+            const dato = localStorage.getItem('miDato'); 
+
+            resultado.textContent = dato || 'No hay datos almacenados.'; 
+        }
+    </script>
+</head>
+<body onload="mostrarDato();"> 
+
+    <h1><center>Mi diario de viaje </center></h1>
+
+    <h2>Estadistica de Viajes</h2>
+    <canvas id="miCanvas" width="500" height="400"></canvas> 
+    <p id="ubicacion">Ubicación: </p> 
+<script> 
+
+        // Datos para el gráfico de barras
+        const paises = ["Cusco", "Lima", "Ica"];
+        const visitas = [5, 3, 2];
+
+        const canvas = document.getElementById('miCanvas'); 
+        const ctx = canvas.getContext('2d');
+
+        const anchoCanvas = canvas.width;
+        const altoCanvas = canvas.height;
+        const margen = 60;
+        const anchoBarra = (anchoCanvas - 2 * margen - (paises.length - 1) * 10) / paises.length; 
+        const maxVisitas = Math.max(...visitas); 
+
+        // Dibujar ejes
+        ctx.beginPath();
+        ctx.moveTo(margen, margen);
+        ctx.lineTo(margen, altoCanvas - margen);
+        ctx.lineTo(anchoCanvas - margen, altoCanvas - margen);
+        ctx.stroke();
+
+        // Dibujar barras y etiquetas
+        for (let i = 0; i < paises.length; i++) {
+            const x = margen + i * (anchoBarra + 10);
+            const alturaBarra = (visitas[i] / maxVisitas) * (altoCanvas - 2 * margen);
+            const y = altoCanvas - margen - alturaBarra;
+
+            ctx.fillStyle = 'pink'; 
+            ctx.fillRect(x, y, anchoBarra, alturaBarra);
+
+            ctx.fillStyle = 'black';
+            ctx.fillText(paises[i], x + anchoBarra / 2, altoCanvas - margen + 15, anchoBarra); 
+            ctx.fillText(visitas[i], x + anchoBarra / 2, y - 10, anchoBarra); 
+        }
+
+        // Etiqueta del eje Y (Número de visitas)
+        ctx.save();
+        ctx.translate(10, altoCanvas / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText("Número de Visitas", 0, 0);
+        ctx.restore();
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(mostrarPosicion, mostrarError);
+        } else {
+            document.getElementById('ubicacion').textContent = "La geolocalización no es compatible con este navegador.";
+        }
+
+        function mostrarPosicion(posicion) {
+            const latitud = posicion.coords.latitude;
+            const longitud = posicion.coords.longitude;   
+
+            document.getElementById('ubicacion').textContent = `Ubicación: Latitud: ${latitud}, Longitud: ${longitud}`;
+        }
+
+        function mostrarError(error) {
+            let mensajeError;
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    mensajeError = "El usuario denegó la solicitud de geolocalización.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    mensajeError = "La información de ubicación no está disponible.";
+                    break;
+                case error.TIMEOUT:
+                    mensajeError = "La solicitud para obtener la ubicación del usuario expiró.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    mensajeError = "Ocurrió un error desconocido.";
+                    break;
+            }
+            document.getElementById('ubicacion').textContent = mensajeError;
+        }    
+    </script>
+
+    <div id="asesoria">
+        <h2>Asesorate conmigo para planear tus viajes</h2>
+        <input type="text" id="dato" placeholder="Introduce un dato">
+        <button onclick="guardarDato();">Guardar Dato</button>
+        <p id="resultado"></p>
+    </div>
+
+</body>
+</html>
